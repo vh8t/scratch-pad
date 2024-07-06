@@ -1,3 +1,5 @@
+![screenshot](https://raw.githubusercontent.com/vh8t/scratch-pad/main/screenshot.png)
+
 # My Scratchpad
 - Version: 0.0.1
 - Made by: vh8t
