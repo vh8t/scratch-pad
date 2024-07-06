@@ -13,3 +13,15 @@
 - [ ] Colors
 
 File made with scratchpad
+
+# Controls
+
+```
+'# '     Title
+'- '     Bullet
+'- [ ]'  Checkbox
+'- [x]'  Checkbox
+
+ctrl+s   Save file as
+esc      Close without save
+```
