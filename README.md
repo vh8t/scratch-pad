@@ -1,0 +1,15 @@
+# My Scratchpad
+- Version: 0.0.1
+- Made by: vh8t
+
+# About Scratchpad
+> - Simple movements
+> - Markdown like syntax
+
+# Roadmap
+- [x] Simple markdown support
+- [ ] Full markdown support
+- [x] Line wrap
+- [ ] Colors
+
+File made with scratchpad
