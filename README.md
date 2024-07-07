@@ -1,7 +1,7 @@
 ![screenshot](https://raw.githubusercontent.com/vh8t/scratch-pad/main/screenshot.png)
 
-# My Scratchpad
-- Version: 0.0.1
+# ScratchPad
+- Version: 0.1.3
 - Made by: vh8t
 
 # About Scratchpad
@@ -10,20 +10,22 @@
 
 # Roadmap
 - [x] Simple markdown support
-- [ ] Full markdown support
 - [x] Line wrap
+- [ ] Full markdown support
 - [ ] Colors
-
-File made with scratchpad
 
 # Controls
 
 ```
 '# '     Title
+'> '     Tab
 '- '     Bullet
 '- [ ]'  Checkbox
 '- [x]'  Checkbox
 
 ctrl+s   Save file as
+ctrl+p   Preview mode
 esc      Close without save
 ```
+
+File made with scratch-pad
