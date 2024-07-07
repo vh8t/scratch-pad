@@ -28,4 +28,7 @@ ctrl+p   Preview mode
 esc      Close without save
 ```
 
+# Configuration
+By default ScratchPad only uses ASCII characters for the markdown visuals but you can change it to either unicode icons or even nerd font if you have one installed. You can install nerd font [here](https://www.nerdfonts.com). To configure which one to use you can either make `~/.scratchpad.conf` or `~/.config/scratchpad/scratchpad.conf` file and set the `nerd_font true` or `unicode true` property. Make sure that only one is enabled at the smame time.
+
 File made with scratch-pad
