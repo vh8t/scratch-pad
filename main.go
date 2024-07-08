@@ -3,6 +3,7 @@ package main
 import (
 	. "fmt"
 	"os"
+	. "strconv"
 	. "strings"
 	"syscall"
 	"unsafe"
@@ -14,19 +15,41 @@ const (
 	KeyEnter     = 13
 	KeyEscape    = 27
 
-	LINENUM      = "\x1b[38;5;239m\x1b[48;5;234m"
-	SELECTEDNUM  = "\x1b[38;5;11m\x1b[48;5;239m"
-	EMPTYLINE    = "\x1b[38;5;236m\x1b[48;5;234m"
-	LINETEXT     = "\x1b[38;5;15m\x1b[48;5;234m"
-	SELECTEDTEXT = "\x1b[38;5;11m\x1b[48;5;239m"
-	STATUSLINE   = "\x1b[38;5;15m\x1b[48;5;234m"
-
-	VERSION = "0.1.3"
+	VERSION = "0.1.5"
 )
 
 var (
+	THEMES_FOLDER = os.ExpandEnv("$HOME/.config/scratchpad/themes")
+
 	NERD_FONT = false
 	UNICODE   = false
+
+	LINE_NUM_FG      = "\x1b[38;5;239m"
+	LINE_NUM_BG      = "\x1b[48;5;234m"
+	TEXT_FG          = "\x1b[38;5;15m"
+	TEXT_BG          = "\x1b[48;5;234m"
+	EMPTY_LINE_FG    = "\x1b[38;5;236m"
+	EMPTY_LINE_BG    = "\x1b[48;5;234m"
+	STATUS_LINE_FG   = "\x1b[38;5;15m"
+	STATUS_LINE_BG   = "\x1b[48;5;234m"
+	SELECTED_NUM_FG  = "\x1b[38;5;11m"
+	SELECTED_NUM_BG  = "\x1b[48;5;239m"
+	SELECTED_TEXT_FG = "\x1b[38;5;11m"
+	SELECTED_TEXT_BG = "\x1b[48;5;239m"
+
+	H1 = "\x1b[38;5;14m"
+	H2 = "\x1b[38;5;13m"
+	H3 = "\x1b[38;5;12m"
+	H4 = "\x1b[38;5;11m"
+	H5 = "\x1b[38;5;10m"
+	H6 = "\x1b[38;5;9m"
+
+	LINENUM      = LINE_NUM_FG + LINE_NUM_BG
+	LINETEXT     = TEXT_FG + TEXT_BG
+	EMPTYLINE    = EMPTY_LINE_FG + EMPTY_LINE_BG
+	STATUSLINE   = STATUS_LINE_FG + STATUS_LINE_BG
+	SELECTEDNUM  = SELECTED_NUM_FG + SELECTED_NUM_BG
+	SELECTEDTEXT = SELECTED_TEXT_FG + SELECTED_TEXT_BG
 )
 
 type Winsize struct {
@@ -189,24 +212,68 @@ func scratchPad(buffer string) error {
 				lineText = LINETEXT
 			}
 
+			var addSpaces int
 			if previewMode {
+				// isBold := false
+				// newLine := ""
+				// for k := 0; k < length(line); k++ {
+				// 	if line[k] == '*' {
+				// 		if length(line) > k+1 && line[k+1] == '*' {
+				// 			if isBold {
+				// 				addSpaces += len("\x1b[22m")
+				// 				newLine += "\x1b[22m"
+				// 				isBold = false
+				// 			} else {
+				// 				addSpaces += len("\x1b[1m")
+				// 				newLine += "\x1b[1m"
+				// 				isBold = true
+				// 			}
+				// 			k++
+				// 		} else {
+				// 			newLine += "*"
+				// 		}
+				// 	} else {
+				// 		newLine += string(line[k])
+				// 	}
+				// }
+				// line = newLine
+				//
+				// isItalic := false
+				// newLine = ""
+				// for k := 0; k < length(line); k++ {
+				// 	if line[k] == '_' {
+				// 		if isItalic {
+				// 			addSpaces += len("\x1b[23m")
+				// 			newLine += "\x1b[23m"
+				// 			isItalic = false
+				// 		} else {
+				// 			addSpaces += len("\x1b[3m")
+				// 			newLine += "\x1b[3m"
+				// 			isItalic = true
+				// 		}
+				// 	} else {
+				// 		newLine += string(line[k])
+				// 	}
+				// }
+				// line = newLine
+
 				if HasPrefix(line, "# ") {
-					lineText = "\x1b[1m\x1b[38;5;14m"
+					lineText = "\x1b[1m" + H1
 					line = Replace(line, "# ", "", 1)
 				} else if HasPrefix(line, "## ") {
-					lineText = "\x1b[1m\x1b[38;5;13m"
+					lineText = "\x1b[1m" + H2
 					line = Replace(line, "## ", "", 1)
 				} else if HasPrefix(line, "### ") {
-					lineText = "\x1b[1m\x1b[38;5;12m"
+					lineText = "\x1b[1m" + H3
 					line = Replace(line, "### ", "", 1)
 				} else if HasPrefix(line, "#### ") {
-					lineText = "\x1b[1m\x1b[38;5;11m"
+					lineText = "\x1b[1m" + H4
 					line = Replace(line, "#### ", "", 1)
 				} else if HasPrefix(line, "##### ") {
-					lineText = "\x1b[1m\x1b[38;5;10m"
+					lineText = "\x1b[1m" + H5
 					line = Replace(line, "##### ", "", 1)
 				} else if HasPrefix(line, "###### ") {
-					lineText = "\x1b[1m\x1b[38;5;9m"
+					lineText = "\x1b[1m" + H6
 					line = Replace(line, "###### ", "", 1)
 				} else {
 					if HasPrefix(line, "> ") {
@@ -301,9 +368,9 @@ func scratchPad(buffer string) error {
 						shiftDown = splitLines - j - 1
 					}
 					if j == 0 {
-						frame = append(frame, Sprintf("%s%s%d%s  %s%s\x1b[0m", lineNum, Repeat(" ", numPadding-len(Sprint(i+1+offset))), i+1+offset, lineText, line[from:to], Repeat(" ", int(ws.Col)-length(line[from:to])-numPadding-2)))
+						frame = append(frame, Sprintf("%s%s%d %s %s%s\x1b[0m", lineNum, Repeat(" ", numPadding-len(Sprint(i+1+offset))), i+1+offset, lineText, line[from:to], Repeat(" ", int(ws.Col)-length(line[from:to])-numPadding-2)))
 					} else {
-						frame = append(frame, Sprintf("%s%s%s%s  %s%s", lineNum, Repeat(" ", numPadding-1), lineWrap, lineText, line[from:to], Repeat(" ", int(ws.Col)-length(line[from:to])-numPadding-2)))
+						frame = append(frame, Sprintf("%s%s%s %s %s%s", lineNum, Repeat(" ", numPadding-1), lineWrap, lineText, line[from:to], Repeat(" ", int(ws.Col)-length(line[from:to])-numPadding-2)))
 					}
 					intLines++
 				}
@@ -313,12 +380,12 @@ func scratchPad(buffer string) error {
 					if pos2d[1]%(int(ws.Col)-numPadding-2) == 0 && pos2d[1]-(intLines-shiftDown-1)*(int(ws.Col)-numPadding-2) > 0 {
 						cursorPos[0]++
 						cursorPos[1] = numPadding + 3
-						frame = append(frame, Sprintf("%s%s%s%s  %s", lineNum, Repeat(" ", numPadding-1), lineWrap, lineText, Repeat(" ", int(ws.Col)-numPadding-2)))
+						frame = append(frame, Sprintf("%s%s%s %s %s", lineNum, Repeat(" ", numPadding-1), lineWrap, lineText, Repeat(" ", int(ws.Col)-numPadding-2)))
 						intLines++
 					}
 				}
 			} else {
-				frame = append(frame, Sprintf("%s%s%d%s  %s%s\x1b[0m", lineNum, Repeat(" ", numPadding-len(Sprint(i+1+offset))), i+1+offset, lineText, line, Repeat(" ", int(ws.Col)-length(line)-numPadding-2)))
+				frame = append(frame, Sprintf("%s%s%d %s %s%s\x1b[0m", lineNum, Repeat(" ", numPadding-len(Sprint(i+1+offset))), i+1+offset, lineText, line, Repeat(" ", int(ws.Col)-length(line)-numPadding-2+addSpaces)))
 				intLines++
 				if i+offset == pos2d[0] {
 					cursorPos[0] = intLines
@@ -326,7 +393,7 @@ func scratchPad(buffer string) error {
 					if cursorPos[1] == int(ws.Col)+1 {
 						cursorPos[0]++
 						cursorPos[1] = numPadding + 3
-						frame = append(frame, Sprintf("%s%s%s%s  %s", lineNum, Repeat(" ", numPadding-1), lineWrap, lineText, Repeat(" ", int(ws.Col)-numPadding-2)))
+						frame = append(frame, Sprintf("%s%s%s %s %s", lineNum, Repeat(" ", numPadding-1), lineWrap, lineText, Repeat(" ", int(ws.Col)-numPadding-2)))
 						intLines++
 					}
 				}
@@ -528,38 +595,169 @@ func scratchPad(buffer string) error {
 	return nil
 }
 
+func hexToAnsi(hex string, fg bool) string {
+	if !HasPrefix(hex, "\"") || !HasSuffix(hex, "\"") {
+		Printf("Invalid hex color in config file: %s\n", hex)
+		os.Exit(1)
+	}
+	hex = hex[1 : len(hex)-1]
+	if !HasPrefix(hex, "#") {
+		Printf("Invalid hex color in config file: %s\n", hex)
+		os.Exit(1)
+	}
+	hex = hex[1:]
+
+	if len(hex) != 6 {
+		Printf("Invalid hex color in config file: %s\n", hex)
+		os.Exit(1)
+	}
+
+	r, err := ParseInt(hex[0:2], 16, 32)
+	if err != nil {
+		Printf("Invalid hex color in config file: %s (%s)\n", hex, hex[0:2])
+		os.Exit(1)
+	}
+
+	g, err := ParseInt(hex[2:4], 16, 32)
+	if err != nil {
+		Printf("Invalid hex color in config file: %s (%s)\n", hex, hex[2:4])
+		os.Exit(1)
+	}
+
+	b, err := ParseInt(hex[4:6], 16, 32)
+	if err != nil {
+		Printf("Invalid hex color in config file: %s (%s)\n", hex, hex[4:6])
+		os.Exit(1)
+	}
+
+	if fg {
+		return Sprintf("\x1b[38;2;%d;%d;%dm", r, g, b)
+	} else {
+		return Sprintf("\x1b[48;2;%d;%d;%dm", r, g, b)
+	}
+}
+
 func parseConfig(contents string) {
-	lines := Split(contents, "\n")
-	for _, line := range lines {
-		segments := Split(line, " ")
-		if segments[0] == "nerd_font" {
-			if segments[1] == "true" {
-				if UNICODE {
-					Println("You cannot use both nerd_font and unicode at the same time.")
-					os.Exit(1)
-				}
-				NERD_FONT = true
-			} else if segments[1] == "false" {
-				NERD_FONT = false
-			} else {
-				Println("Invalid value for nerd_font.")
-				os.Exit(1)
+	for i := 0; i < len(contents); i++ {
+		if contents[i] == '#' {
+			for ; i < len(contents) && contents[i] != '\n'; i++ {
 			}
-		} else if segments[0] == "unicode" {
-			if segments[1] == "true" {
-				if NERD_FONT {
-					Println("You cannot use both nerd_font and unicode at the same time.")
+		} else if contents[i] == ' ' || contents[i] == '\t' || contents[i] == '\n' {
+			continue
+		} else {
+			var key string
+			var value string
+			for ; i < len(contents) && contents[i] != ' ' && contents[i] != '\t' && contents[i] != '\n'; i++ {
+				key += string(contents[i])
+			}
+			for ; i < len(contents) && (contents[i] == ' ' || contents[i] == '\t'); i++ {
+			}
+			for ; i < len(contents) && contents[i] != '\n'; i++ {
+				if contents[i] == '"' {
+					value += string(contents[i])
+					i++
+					for ; i < len(contents) && contents[i] != '"'; i++ {
+						value += string(contents[i])
+					}
+					value += string(contents[i])
+					break
+				}
+				value += string(contents[i])
+			}
+			for ; i < len(contents) && contents[i] != '\n'; i++ {
+			}
+
+			if key == "nerd_font" {
+				if value == "true" {
+					NERD_FONT = true
+				} else if value == "false" {
+					NERD_FONT = false
+				} else {
+					Printf("Invalid value for nerd_font in config file: %s\n", value)
 					os.Exit(1)
 				}
-				UNICODE = true
-			} else if segments[1] == "false" {
-				UNICODE = false
+			} else if key == "unicode" {
+				if value == "true" {
+					UNICODE = true
+				} else if value == "false" {
+					UNICODE = false
+				} else {
+					Printf("Invalid value for unicode in config file: %s\n", value)
+					os.Exit(1)
+				}
+			} else if key == "theme" {
+				if !HasPrefix(value, "\"") || !HasSuffix(value, "\"") {
+					Printf("Invalid theme in config file: %s\n", value)
+					os.Exit(1)
+				}
+				value = value[1 : len(value)-1]
+				value = ReplaceAll(value, " ", "-")
+				if _, err := os.Stat(THEMES_FOLDER + "/" + value + ".conf"); err != nil {
+					Printf("Invalid theme in config file: %s\n", value)
+					os.Exit(1)
+				}
+				contents, err := os.ReadFile(THEMES_FOLDER + "/" + value + ".conf")
+				if err != nil {
+					Printf("Error reading theme file: %s\n", value)
+					os.Exit(1)
+				}
+				parseConfig(string(contents))
+			} else if key == "themes_folder" {
+				if !HasPrefix(value, "\"") || !HasSuffix(value, "\"") {
+					Printf("Invalid themes_folder in config file: %s\n", value)
+					os.Exit(1)
+				}
+				value = Replace(value[1:len(value)-1], "~", os.Getenv("HOME"), 1)
+				THEMES_FOLDER = os.ExpandEnv(value)
+			} else if key == "fg_text" {
+				TEXT_FG = hexToAnsi(value, true)
+			} else if key == "bg_text" {
+				TEXT_BG = hexToAnsi(value, false)
+			} else if key == "fg_line_num" {
+				LINE_NUM_FG = hexToAnsi(value, true)
+			} else if key == "bg_line_num" {
+				LINE_NUM_BG = hexToAnsi(value, false)
+			} else if key == "fg_empty_line" {
+				EMPTY_LINE_FG = hexToAnsi(value, true)
+			} else if key == "bg_empty_line" {
+				EMPTY_LINE_BG = hexToAnsi(value, false)
+			} else if key == "fg_status_line" {
+				STATUS_LINE_FG = hexToAnsi(value, true)
+			} else if key == "bg_status_line" {
+				STATUS_LINE_BG = hexToAnsi(value, false)
+			} else if key == "fg_selected_num" {
+				SELECTED_NUM_FG = hexToAnsi(value, true)
+			} else if key == "bg_selected_num" {
+				SELECTED_NUM_BG = hexToAnsi(value, false)
+			} else if key == "fg_selected_text" {
+				SELECTED_TEXT_FG = hexToAnsi(value, true)
+			} else if key == "bg_selected_text" {
+				SELECTED_TEXT_BG = hexToAnsi(value, false)
+			} else if key == "h1" {
+				H1 = hexToAnsi(value, true)
+			} else if key == "h2" {
+				H2 = hexToAnsi(value, true)
+			} else if key == "h3" {
+				H3 = hexToAnsi(value, true)
+			} else if key == "h4" {
+				H4 = hexToAnsi(value, true)
+			} else if key == "h5" {
+				H5 = hexToAnsi(value, true)
+			} else if key == "h6" {
+				H6 = hexToAnsi(value, true)
 			} else {
-				Println("Invalid value for unicode.")
+				Printf("Invalid key in config file: %s\n", key)
 				os.Exit(1)
 			}
 		}
 	}
+
+	LINENUM = LINE_NUM_FG + LINE_NUM_BG
+	LINETEXT = TEXT_FG + TEXT_BG
+	EMPTYLINE = EMPTY_LINE_FG + EMPTY_LINE_BG
+	STATUSLINE = STATUS_LINE_FG + STATUS_LINE_BG
+	SELECTEDNUM = SELECTED_NUM_FG + SELECTED_NUM_BG
+	SELECTEDTEXT = SELECTED_TEXT_FG + SELECTED_TEXT_BG
 }
 
 func init() {
@@ -589,8 +787,10 @@ func main() {
 	defer restoreTerminal(oldState)
 
 	var buffer string
-	if len(os.Args) == 2 {
-		if os.Args[1] == "-v" || os.Args[1] == "--version" {
+	if len(os.Args) >= 2 {
+		if os.Args[1] == "--create-config" {
+
+		} else if os.Args[1] == "-v" || os.Args[1] == "--version" {
 			Println("ScratchPad version", VERSION, "\r")
 			restoreTerminal(oldState)
 			os.Exit(0)
